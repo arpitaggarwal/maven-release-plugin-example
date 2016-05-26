@@ -1,0 +1,101 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.test</groupId>
+	<artifactId>maven-release-plugin-example</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<scm>
+		<url>https://github.com/arpitaggarwal/maven-release-plugin-example</url>
+		<connection>scm:git:https://github.com/arpitaggarwal/maven-release-plugin-example.git</connection>
+      <tag>HEAD</tag>
+  </scm>
+	
+	<!-- Repository Information -->
+	<distributionManagement>
+		<repository>
+			<id>nexus-releases</id>
+			<!-- http://localhost:8081/repository/<repository-name> -->
+			<url>http://localhost:8081/repository/api-release</url>
+		</repository>
+	</distributionManagement>
+	<profiles>
+		<profile>
+			<id>test</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.1</version>
+						<executions>
+							<execution>
+								<phase>test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										<echo>Using env.test.properties</echo>
+										<!-- Using predefined maven properties mentioned in https://github.com/arpitaggarwal/predefined_maven_properties -->
+										<copy file="src/main/resources/env.test.properties" tofile="${project.build.outputDirectory}/env.properties" />
+									</tasks>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>releases</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.5.1</version>
+						<executions>
+							<execution>
+								<id>default-deploy</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>deploy</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<serverId>nexus-releases</serverId>
+							<nexusUrl>http://localhost:8081/</nexusUrl>
+							<skipStaging>true</skipStaging>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	<build>
+	 <pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+				    <tag>v${releaseVersion}</tag>
+					<tagNameFormat>v@{project.version}</tagNameFormat>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<!-- releaseProfiles configuration will actually force a Maven profile 
+						– the `releases` profile – to become active during the Release process. -->
+					<releaseProfiles>releases</releaseProfiles>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-scm-plugin</artifactId>
+						<version>1.8.1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+		 </pluginManagement>
+	</build>
+</project>
